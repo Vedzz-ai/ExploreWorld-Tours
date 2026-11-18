@@ -1,0 +1,42 @@
+name: Build and deploy ExploreWorld Tours
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Get project files
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore packages
+        run: nuget restore .\WebApplication20\WebApplication20.csproj
+
+      - name: Build and publish ASP.NET project
+        run: >
+          msbuild .\WebApplication20\WebApplication20.csproj
+          /p:Configuration=Release
+          /p:DeployOnBuild=true
+          /p:WebPublishMethod=FileSystem
+          /p:publishUrl="${{ github.workspace }}\publish"
+          /p:DeleteExistingFiles=true
+
+      - name: Deploy to MonsterASP.NET
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+          source-path: '\publish\'
