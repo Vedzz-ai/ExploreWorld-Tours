@@ -25,10 +25,9 @@ jobs:
           /p:publishUrl="${{ github.workspace }}\publish"
           /p:DeleteExistingFiles=true
       - name: Deploy to MonsterASP.NET
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
-        with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
-          source-path: '\publish\'
+        env:
+          DEPLOY_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        run: |
+          $msdeploy = "C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\msdeploy.exe"
+          & $msdeploy -verb:sync "-source:contentPath=$env:GITHUB_WORKSPACE\publish" "-dest:contentPath=${{ secrets.WEBSITE_NAME }},computerName=${{ secrets.SERVER_COMPUTER_NAME }},userName=${{ secrets.SERVER_USERNAME }},password=$env:DEPLOY_PASSWORD,authType=Basic" -enableRule:AppOffline -allowUntrusted
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
