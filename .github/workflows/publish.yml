@@ -15,7 +15,7 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
       - name: Restore packages
-        run: nuget restore .\WebApplication20\WebApplication20.csproj
+        run: nuget restore .\WebApplication20\WebApplication20.csproj -PackagesDirectory .\packages
       - name: Build and publish ASP.NET project
         run: >
           msbuild .\WebApplication20\WebApplication20.csproj
